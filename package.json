@@ -1,0 +1,37 @@
+{
+  "name": "logger-rotate",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha $(find . -name '*.spec.js' ! -ipath '*node_modules*') --reporter spec",
+    "test:watch": "npm install && mocha $(find . -name '*.spec.js' ! -ipath '*node_modules*') --reporter min --watch",
+    "cover": "node_modules/istanbul/lib/cli.js cover node_modules/mocha/bin/_mocha -- --reporter spec $(find . -name '*.spec.js' ! -ipath '*node_modules*')"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alexc155/logger-rotate.git"
+  },
+  "keywords": [
+    ""
+  ],
+  "author": "Alex Clark <ahclark@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/alexc155/logger-rotate/issues"
+  },
+  "homepage": "https://github.com/alexc155/logger-rotate#readme",
+  "devDependencies": {
+    "chai": "^4.1.2",
+    "coveralls": "^3.0.2",
+    "istanbul": "^0.4.5",
+    "mocha": "^5.2.0",
+    "mock-fs": "^4.5.0",
+    "proxyquire": "^2.0.1",
+    "sinon": "^6.0.1"
+  },
+  "dependencies": {
+    "update-notifier": "^2.5.0"
+  },
+  "readme": "./readme.md"
+}
