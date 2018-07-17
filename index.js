@@ -3,22 +3,7 @@
 
 const updateNotifier = require("update-notifier");
 const pkg = require("./package.json");
-
-function showHelp() {
-  log.info(`
-  Description.
-
-  Available commands:
-
-    --help                    | -h
-
-  Example usage:
-    $ ...
-
-  Notes:
-    * Note
-`);
-}
+const service = require("./services");
 
 function main() {
   updateNotifier({
@@ -33,12 +18,14 @@ function main() {
   const args = process.argv.slice(3);
 
   switch (action.toLowerCase()) {
-    case "-h":
-    case "--help":
-    case "":
-    case undefined:
-    default:
-      showHelp();
+    case "log":
+      service.log(args);
+      break;
+    case "error":
+      service.error(args);
+      break;
+    case "warn":
+      service.warn(args);
       break;
   }
 }
