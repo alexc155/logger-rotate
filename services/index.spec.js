@@ -18,8 +18,12 @@ describe("#services", function() {
   });
 
   it("Creates a log folder if it doesn't exist", function() {
+    mockFs({
+      "./": {}
+    });
     sut.makeFolderSync();
     expect(existsSync(sut.LOG_FOLDER)).to.be.equal(true);
+    mockFs.restore();
   });
 
   it("Doesn't error trying to create a log folder if it exists", function() {
@@ -170,6 +174,7 @@ describe("#services", function() {
       "./logs": {}
     });
 
+    /* istanbul ignore next */
     try {
       sut.error(["hello world"]);
     } catch (error) {
