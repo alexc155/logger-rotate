@@ -12,23 +12,22 @@ const sut = require("./index");
 
 const consoleError = console.error;
 
-beforeEach(function() {
-  mockFs({
-    "./": {}
-  });
-  console.error = function() {};
-  sinon.spy(console, "log");
-  sinon.spy(console, "error");
-});
-
-afterEach(function() {
-  mockFs.restore();
-  console.log.restore();
-  console.error.restore();
-  console.error = consoleError;
-});
-
 describe("#config", function() {
+  beforeEach(function() {
+    mockFs({
+      "./": {}
+    });
+    console.error = function() {};
+    sinon.spy(console, "log");
+    sinon.spy(console, "error");
+  });
+
+  afterEach(function() {
+    mockFs.restore();
+    console.log.restore();
+    console.error.restore();
+    console.error = consoleError;
+  });
   it("writes a value to the config file", function() {
     sut.writeConfig("setting", "value");
     // Run a second time to run thru' if the config file was missing.
