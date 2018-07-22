@@ -42,3 +42,12 @@ function main() {
 }
 
 main();
+
+module.exports = {
+  logSync: service.logSync,
+  errorSync: service.errorSync,
+  warnSync: service.warnSync,
+  log: service.log,
+  error: service.error,
+  warn: service.warn
+};

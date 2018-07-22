@@ -1,7 +1,7 @@
 {
   "name": "logger-rotate",
   "version": "0.1.0",
-  "description": "",
+  "description": "Log messages to files that are rotated daily",
   "main": "index.js",
   "scripts": {
     "test": "mocha $(find . -name '*.spec.js' ! -ipath '*node_modules*') --reporter spec",
@@ -13,7 +13,7 @@
     "url": "git+https://github.com/alexc155/logger-rotate.git"
   },
   "keywords": [
-    ""
+    "log rotate error console logging file"
   ],
   "author": "Alex Clark <ahclark@gmail.com>",
   "license": "MIT",
