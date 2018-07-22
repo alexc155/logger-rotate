@@ -12,12 +12,10 @@ const sut = require("./index");
 const showWarning = function(args) {
   let template = args[0];
 
-  if (template) {
-    for (const replacement of args.slice(1)) {
-      template = template.replace(/\%\w/, replacement);
-    }
-    console.warn(template);
+  for (const replacement of args.slice(1)) {
+    template = template.replace(/\%\w/, replacement);
   }
+  console.warn(template);
 };
 
 const flooredDate = new Date().toISOString().substring(0, 10);
