@@ -2,16 +2,21 @@
 
 const {
   appendFileSync,
+  appendFile,
   renameSync,
   unlinkSync,
+  mkdir,
   mkdirSync,
   existsSync,
-  lstatSync
+  lstatSync,
+  readdir
 } = require("fs");
 
 const { EOL } = require("os");
 
 const LOG_FOLDER = `${__dirname}/../logs`;
+
+const flooredDate = new Date().toISOString().substring(0, 10);
 
 function dateDiffInDays(a, b) {
   // Discard the time and time-zone information.
@@ -22,17 +27,28 @@ function dateDiffInDays(a, b) {
 }
 
 function makeFolderSync() {
-  if (!existsSync(`${LOG_FOLDER}`)) {
-    mkdirSync(`${LOG_FOLDER}`);
+  if (!existsSync(LOG_FOLDER)) {
+    mkdirSync(LOG_FOLDER);
   }
 }
 
-function rotateLogFilesSync(name) {
+function makeFolder(callback, testingError) {
+  mkdir(LOG_FOLDER, err => {
+    if (testingError || (err && err.code !== "EEXIST")) {
+      err = err || "Test Error";
+      callback(err);
+    } else {
+      callback();
+    }
+  });
+}
+
+function rotateLogFilesSync(name, suffix) {
   try {
     unlinkSync(`${LOG_FOLDER}/${name}.09`);
   } catch (error) {
     if (error.code !== "ENOENT") {
-      console.error(error);
+      console.error("rotateLogFilesSync: ", error);
       throw error;
     }
   }
@@ -44,66 +60,117 @@ function rotateLogFilesSync(name) {
       );
     }
   }
-  renameSync(`${LOG_FOLDER}/${name}.log`, `${LOG_FOLDER}/${name}.01`);
+  renameSync(`${LOG_FOLDER}/${name}.${suffix}.log`, `${LOG_FOLDER}/${name}.01`);
 }
 
 function makeLogFileSync(name) {
-  if (!existsSync(`${LOG_FOLDER}/${name}.log`)) {
-    appendFileSync(`${LOG_FOLDER}/${name}.log`, EOL);
+  if (!existsSync(`${LOG_FOLDER}/${name}.${flooredDate}.log`)) {
+    appendFileSync(`${LOG_FOLDER}/${name}.${flooredDate}.log`, EOL);
   } else if (
     dateDiffInDays(
-      lstatSync(`${LOG_FOLDER}/${name}.log`).birthtime,
+      lstatSync(`${LOG_FOLDER}/${name}.${flooredDate}.log`).birthtime,
       new Date()
     ) >= 1
   ) {
-    rotateLogFilesSync(name);
-    appendFileSync(`${LOG_FOLDER}/${name}.log`, EOL);
+    rotateLogFilesSync(name, flooredDate);
+    appendFileSync(`${LOG_FOLDER}/${name}.${flooredDate}.log`, EOL);
   }
+}
+
+function logMessage(name, message, callback, testingError, testingCallback) {
+  message = `${new Date().toUTCString()} - ${message}${EOL}`;
+
+  appendFile(`${LOG_FOLDER}/${name}.${flooredDate}.log`, message, err => {
+    if (testingError || err) {
+      if (!testingError && err.code === "ENOENT") {
+        makeFolder(callback);
+      } else {
+        err = err || "Test Error";
+        callback(err);
+      }
+      return;
+    }
+    callback();
+  });
+
+  readdir(LOG_FOLDER, function(err, items) {
+    if (items) {
+      for (const item of items) {
+        if (item.indexOf(name) === 0 && item.indexOf(".log" > 0)) {
+          const date = item.replace(`${name}.`, "").replace(".log", "");
+          if (dateDiffInDays(new Date(date), new Date()) >= 1) {
+            rotateLogFilesSync(name, date);
+            appendFileSync(`${LOG_FOLDER}/${name}.log`, EOL);
+          }
+        }
+      }
+    }
+    if (testingCallback) testingCallback();
+  });
 }
 
 function logMessageSync(name, message) {
   message = `${new Date().toUTCString()} - ${message}${EOL}`;
-  appendFileSync(`${LOG_FOLDER}/${name}.log`, message);
+  appendFileSync(`${LOG_FOLDER}/${name}.${flooredDate}.log`, message);
 }
 
-function log() {
-  console.log(Array.from(arguments)[0].join(" "));
+function log(message, callback) {
+  logMessage("info", message, callback);
+}
+
+function logSync(message) {
+  console.log(message);
 
   makeFolderSync();
 
   makeLogFileSync("info");
 
-  logMessageSync("info", Array.from(arguments)[0].join(" "));
+  logMessageSync("info", message);
 }
 
-function error() {
-  console.error(Array.from(arguments)[0].join(" "));
+function error(message, callback) {
+  logMessage("error", message, callback);
+}
+
+function errorSync(message) {
+  console.error(message);
 
   makeFolderSync();
 
   makeLogFileSync("error");
 
-  logMessageSync("error", Array.from(arguments)[0].join(" "));
+  logMessageSync("error", message);
 }
 
-function warn() {
-  console.warn(Array.from(arguments)[0].join(" "));
+function warn(message, callback) {
+  logMessage("warn", message, callback);
+}
+
+function warnSync(message) {
+  console.warn(message);
 
   makeFolderSync();
 
   makeLogFileSync("warn");
 
-  logMessageSync("warn", Array.from(arguments)[0].join(" "));
+  logMessageSync("warn", message);
 }
 
+// logMessage("info", "hello", () => {});
+
 module.exports = {
+  logSync,
+  errorSync,
+  warnSync,
   log,
   error,
   warn,
   dateDiffInDays,
   makeFolderSync,
+  makeFolder,
   rotateLogFilesSync,
   makeLogFileSync,
+  logMessage,
   logMessageSync,
   LOG_FOLDER
 };

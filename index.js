@@ -17,15 +17,26 @@ function main() {
   action = action || "";
   const args = process.argv.slice(3);
 
+  const message = Array.from(args).join(" ");
+
   switch (action.toLowerCase()) {
+    case "logsync":
+      service.logSync(message);
+      break;
+    case "errorsync":
+      service.errorSync(message);
+      break;
+    case "warnsync":
+      service.warnSync(message);
+      break;
     case "log":
-      service.log(args);
+      service.log(message, () => console.log(message));
       break;
     case "error":
-      service.error(args);
+      service.error(message, () => console.error(message));
       break;
     case "warn":
-      service.warn(args);
+      service.warn(message, () => console.warn(message));
       break;
   }
 }
