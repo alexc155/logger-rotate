@@ -22,7 +22,7 @@ $ npm install logger-rotate --save
 Optional - Set the path where logs should be stored. Eiher relative or absolute:
 
 ```
-$ node ./node_modules/logger-rotate/index.js setLogFolder ../../logs
+$ node ./node_modules/logger-rotate/index.js setLogFolder ./logs
 ```
 
 ## Usage
