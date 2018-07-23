@@ -5,10 +5,11 @@ const updateNotifier = require("update-notifier");
 const pkg = require("./package.json");
 const service = require("./services");
 const { writeConfig } = require("./config");
+const { existsSync, mkdirSync } = require("fs");
 
 function setLogFolder(location) {
   if (!existsSync(location)) {
-    throw `Path ${location} does not exist`;
+    mkdirSync(location);
   }
   writeConfig("LOG_FOLDER", location);
 }

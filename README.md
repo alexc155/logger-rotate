@@ -61,4 +61,4 @@ Add unit tests for any new or changed functionality. Lint and test your code.
 ## Release History
 
 - 0.1.0 Initial release.
-- 0.2.0 Ability to set log folder & fixed log rotation bug.
+- 0.2.1 Ability to set log folder & fixed log rotation bug.
