@@ -15,35 +15,43 @@ A history of older log files is available.
 
 ## Installation
 
-  `npm install logger-rotate --save`
+```
+$ npm install logger-rotate --save
+```
+
+Optional - Set the path where logs should be stored. Eiher relative or absolute:
+
+```
+$ node ./node_modules/logger-rotate/index.js setLogFolder ../../logs
+```
 
 ## Usage
 
-  ```
-  var logger = require("logger-rotate");
+```
+var logger = require("logger-rotate");
 
-  logger.logSync("Hello World");
+logger.logSync("Hello World");
 
-  logger.warnSync("Warning!!!");
+logger.warnSync("Warning!!!");
 
-  logger.errorSync("Game Over!");
+logger.errorSync("Game Over!");
 
-  logger.log("Hello World", () => { 
-      console.log(":-)"); 
-    });
+logger.log("Hello World", () => {
+    console.log(":-)");
+  });
 
-  logger.warn("Warning!!!", () => { 
-      console.warn(":-|"); 
-    });
+logger.warn("Warning!!!", () => {
+    console.warn(":-|");
+  });
 
-  logger.error("Game Over!", () => { 
-      console.error(":-("); 
-    });
-  ```
+logger.error("Game Over!", () => {
+    console.error(":-(");
+  });
+```
 
 ## Tests
 
-  npm test
+npm test
 
 ## Contributing
 
@@ -52,4 +60,5 @@ Add unit tests for any new or changed functionality. Lint and test your code.
 
 ## Release History
 
-* 0.1.0 Initial release
+- 0.1.0 Initial release.
+- 0.2.0 Ability to set log folder & fixed log rotation bug.

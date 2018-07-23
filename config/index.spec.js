@@ -6,7 +6,7 @@ const { expect } = require("chai");
 const mockFs = require("mock-fs");
 const sinon = require("sinon");
 
-const CONFIG_FILE = "./logger-rotate.config";
+const CONFIG_FILE = "./logger-rotate.config.json";
 
 const sut = require("./index");
 
@@ -106,7 +106,7 @@ describe("#config", function() {
 
     expect(setting).to.equal(undefined);
 
-    expect(console.error.calledWith("Config file does not exist")).to.equal(
+    expect(console.error.calledWith("Config setting does not exist")).to.equal(
       true
     );
   });

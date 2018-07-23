@@ -4,6 +4,14 @@
 const updateNotifier = require("update-notifier");
 const pkg = require("./package.json");
 const service = require("./services");
+const { writeConfig } = require("./config");
+
+function setLogFolder(location) {
+  if (!existsSync(location)) {
+    throw `Path ${location} does not exist`;
+  }
+  writeConfig("LOG_FOLDER", location);
+}
 
 function main() {
   updateNotifier({
@@ -38,6 +46,9 @@ function main() {
     case "warn":
       service.warn(message, () => console.warn(message));
       break;
+    case "setlogfolder":
+      setLogFolder(message);
+      break;
   }
 }
 
@@ -49,5 +60,6 @@ module.exports = {
   warnSync: service.warnSync,
   log: service.log,
   error: service.error,
-  warn: service.warn
+  warn: service.warn,
+  setLogFolder
 };

@@ -8,13 +8,13 @@ const {
   mkdir,
   mkdirSync,
   existsSync,
-  lstatSync,
+  readdirSync,
   readdir
 } = require("fs");
 
 const { EOL } = require("os");
 
-const LOG_FOLDER = `${__dirname}/../logs`;
+const LOG_FOLDER = require("../logger-rotate.config.json").LOG_FOLDER;
 
 const flooredDate = new Date().toISOString().substring(0, 10);
 
@@ -60,24 +60,50 @@ function rotateLogFilesSync(name, suffix) {
       );
     }
   }
+
   renameSync(`${LOG_FOLDER}/${name}.${suffix}.log`, `${LOG_FOLDER}/${name}.01`);
 }
 
 function makeLogFileSync(name) {
-  if (!existsSync(`${LOG_FOLDER}/${name}.${flooredDate}.log`)) {
-    appendFileSync(`${LOG_FOLDER}/${name}.${flooredDate}.log`, EOL);
-  } else if (
-    dateDiffInDays(
-      lstatSync(`${LOG_FOLDER}/${name}.${flooredDate}.log`).birthtime,
-      new Date()
-    ) >= 1
-  ) {
-    rotateLogFilesSync(name, flooredDate);
-    appendFileSync(`${LOG_FOLDER}/${name}.${flooredDate}.log`, EOL);
+  const logPath = `${LOG_FOLDER}/${name}.${flooredDate}.log`;
+
+  const pattern = RegExp(`${name}.\\d{4}-\\d{2}-\\d{2}`);
+
+  for (const item of readdirSync(LOG_FOLDER)) {    
+    if (pattern.test(item)) {      
+      const date = item.replace(`${name}.`, "").replace(".log", "");      
+      if (dateDiffInDays(new Date(date), new Date()) >= 1) {
+        rotateLogFilesSync(name, date);
+      }
+    }
+  }
+  if (!existsSync(logPath)) {
+    appendFileSync(logPath, EOL);
   }
 }
 
+function rotateLogFiles(name, testingCallback) {
+  readdir(LOG_FOLDER, function(err, items) {
+    if (items) {
+      const pattern = RegExp(`${name}.\\d{4}-\\d{2}-\\d{2}.log`);
+
+      for (const item of items) {
+        if (pattern.test(item)) {
+          const date = item.replace(`${name}.`, "").replace(".log", "");
+          if (dateDiffInDays(new Date(date), new Date()) >= 1) {
+            rotateLogFilesSync(name, date);
+            appendFileSync(`${LOG_FOLDER}/${name}.log`, EOL);
+          }
+        }
+      }
+    }
+    if (testingCallback) testingCallback();
+  });
+}
+
 function logMessage(name, message, callback, testingError, testingCallback) {
+  rotateLogFiles(name, testingCallback);
+
   message = `${new Date().toUTCString()} - ${message}${EOL}`;
 
   appendFile(`${LOG_FOLDER}/${name}.${flooredDate}.log`, message, err => {
@@ -91,21 +117,6 @@ function logMessage(name, message, callback, testingError, testingCallback) {
       return;
     }
     callback();
-  });
-
-  readdir(LOG_FOLDER, function(err, items) {
-    if (items) {
-      for (const item of items) {
-        if (item.indexOf(name) === 0 && item.indexOf(".log" > 0)) {
-          const date = item.replace(`${name}.`, "").replace(".log", "");
-          if (dateDiffInDays(new Date(date), new Date()) >= 1) {
-            rotateLogFilesSync(name, date);
-            appendFileSync(`${LOG_FOLDER}/${name}.log`, EOL);
-          }
-        }
-      }
-    }
-    if (testingCallback) testingCallback();
   });
 }
 

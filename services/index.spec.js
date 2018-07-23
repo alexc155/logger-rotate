@@ -170,17 +170,24 @@ describe("#services", function() {
   it("Rotates the log file if needed", function() {
     mockFs({
       [sut.LOG_FOLDER]: {
-        [`info.${flooredDate}.log`]: mockFs.file({
-          content: "log today",
+        [`info.1970-01-01.log`]: mockFs.file({
+          content: "log from long ago",
           birthtime: new Date(1)
-        })
+        }),
+        ["info.01"]: "archived log"
       }
     });
     sut.makeLogFileSync("info");
 
     expect(
-      readFileSync(`${sut.LOG_FOLDER}/info.01`, { encoding: "utf8" })
-    ).to.equal("log today");
+      readFileSync(`${sut.LOG_FOLDER}/info.01`, {
+        encoding: "utf8"
+      })
+    ).to.equal("log from long ago");
+
+    expect(
+      readFileSync(`${sut.LOG_FOLDER}/info.02`, { encoding: "utf8" })
+    ).to.equal("archived log");
 
     expect(
       readFileSync(`${sut.LOG_FOLDER}/info.${flooredDate}.log`, {

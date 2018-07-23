@@ -3,7 +3,7 @@
 const { existsSync, writeFileSync, readFileSync } = require("fs");
 const { log } = require("../utils");
 
-const CONFIG_FILE = "./logger-rotate.config";
+const CONFIG_FILE = "./logger-rotate.config.json";
 
 function writeConfig(setting, value) {
   try {
@@ -29,8 +29,7 @@ function writeConfig(setting, value) {
 
 function readConfig(setting, defaultValue) {
   if (!existsSync(CONFIG_FILE)) {
-    log.error("Config file does not exist");
-    return;
+    writeFileSync(CONFIG_FILE, "{}");
   }
 
   const config = JSON.parse(readFileSync(CONFIG_FILE, { encoding: "utf8" }));
