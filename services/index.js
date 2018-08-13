@@ -14,6 +14,8 @@ const {
 
 const { EOL } = require("os");
 
+const { consoleLog } = require("../utils");
+
 const LOG_FOLDER = require("../logger-rotate.config.json").LOG_FOLDER;
 
 const flooredDate = new Date().toISOString().substring(0, 10);
@@ -48,7 +50,7 @@ function rotateLogFilesSync(name, suffix) {
     unlinkSync(`${LOG_FOLDER}/${name}.09`);
   } catch (error) {
     if (error.code !== "ENOENT") {
-      console.error("rotateLogFilesSync: ", error);
+      consoleLog.error(`rotateLogFilesSync: ${error}`);
       throw error;
     }
   }
@@ -131,7 +133,7 @@ function log(message, callback) {
 
 function logSync(message, silent) {
   if (!silent) {
-    console.log(message);
+    consoleLog.info(message);
   }
 
   makeFolderSync();
@@ -147,7 +149,7 @@ function error(message, callback) {
 
 function errorSync(message, silent) {
   if (!silent) {
-    console.error(message);
+    consoleLog.error(message);
   }
 
   makeFolderSync();
@@ -172,8 +174,6 @@ function warnSync(message, silent) {
 
   logMessageSync("warn", message);
 }
-
-// logMessage("info", "hello", () => {});
 
 module.exports = {
   logSync,

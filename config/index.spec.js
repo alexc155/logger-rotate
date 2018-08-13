@@ -5,29 +5,34 @@ const { readFileSync, writeFileSync, unlinkSync } = require("fs");
 const { expect } = require("chai");
 const mockFs = require("mock-fs");
 const sinon = require("sinon");
+const proxyquire = require("proxyquire").noPreserveCache();
+
+const mockUtils = {
+  consoleLog: {
+    error: function() {}
+  }
+};
 
 const CONFIG_FILE = "./logger-rotate.config.json";
 
-const sut = require("./index");
-
-const consoleError = console.error;
+const sut = proxyquire("./index", {
+  "../utils": mockUtils
+});
 
 describe("#config", function() {
   beforeEach(function() {
     mockFs({
       "./": {}
     });
-    console.error = function() {};
-    sinon.spy(console, "log");
-    sinon.spy(console, "error");
+
+    sinon.spy(mockUtils.consoleLog, "error");
   });
 
   afterEach(function() {
     mockFs.restore();
-    console.log.restore();
-    console.error.restore();
-    console.error = consoleError;
+    mockUtils.consoleLog.error.restore();
   });
+
   it("writes a value to the config file", function() {
     sut.writeConfig("setting", "value");
     // Run a second time to run thru' if the config file was missing.
@@ -46,7 +51,9 @@ describe("#config", function() {
 
     expect(result).to.equal(false);
 
-    expect(console.error.calledWith("Error in writeConfig: ")).to.equal(true);
+    expect(
+      mockUtils.consoleLog.error.calledWith("Error in writeConfig: ")
+    ).to.equal(true);
   });
 
   it("reads a setting from the config file", function() {
@@ -87,9 +94,9 @@ describe("#config", function() {
 
     expect(setting).to.equal(undefined);
 
-    expect(console.error.calledWith("Config setting does not exist")).to.equal(
-      true
-    );
+    expect(
+      mockUtils.consoleLog.error.calledWith("Config setting does not exist")
+    ).to.equal(true);
   });
 
   it("errors when reading a setting from the config file if the config file doesn't exist", function() {
@@ -106,8 +113,8 @@ describe("#config", function() {
 
     expect(setting).to.equal(undefined);
 
-    expect(console.error.calledWith("Config setting does not exist")).to.equal(
-      true
-    );
+    expect(
+      mockUtils.consoleLog.error.calledWith("Config setting does not exist")
+    ).to.equal(true);
   });
 });

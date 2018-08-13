@@ -1,7 +1,7 @@
 "use strict";
 
 module.exports = {
-  log: {
+  consoleLog: {
     info: function() {
       console.log.apply(console, arguments);
     },

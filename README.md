@@ -70,3 +70,4 @@ Add unit tests for any new or changed functionality. Lint and test your code.
 - 0.1.0 Initial release.
 - 0.2.1 Ability to set log folder & fixed log rotation bug.
 - 0.3.0 Flag for silent sync running.
+- 0.3.1 Tidy tests.

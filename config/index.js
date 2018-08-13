@@ -1,7 +1,7 @@
 "use strict";
 
 const { existsSync, writeFileSync, readFileSync } = require("fs");
-const { log } = require("../utils");
+const { consoleLog } = require("../utils");
 
 const CONFIG_FILE = "./logger-rotate.config.json";
 
@@ -21,8 +21,8 @@ function writeConfig(setting, value) {
     writeFileSync(CONFIG_FILE, JSON.stringify(config));
     return true;
   } catch (error) {
-    log.error("Error in writeConfig: ");
-    log.error(error);
+    consoleLog.error("Error in writeConfig: ");
+    consoleLog.error(error);
     return false;
   }
 }
@@ -35,7 +35,7 @@ function readConfig(setting, defaultValue) {
   const config = JSON.parse(readFileSync(CONFIG_FILE, { encoding: "utf8" }));
 
   if (!config[setting] && !defaultValue) {
-    log.error("Config setting does not exist");
+    consoleLog.error("Config setting does not exist");
     return;
   } else if (!config[setting]) {
     writeConfig(setting, defaultValue);

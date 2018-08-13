@@ -1,26 +1,25 @@
 const { expect } = require("chai");
 const mockFs = require("mock-fs");
 const sinon = require("sinon");
+const proxyquire = require("proxyquire").noPreserveCache();
+
+const mockUtils = {
+  consoleLog: {
+    error: function() {},
+    info: function() {}
+  }
+};
 
 const { existsSync, readFileSync, appendFileSync } = require("fs");
 
 const { EOL } = require("os");
 
-const sut = require("./index");
-
-/* istanbul ignore next */
-const showWarning = function(args) {
-  let template = args[0];
-
-  for (const replacement of args.slice(1)) {
-    template = template.replace(/\%\w/, replacement);
-  }
-  console.warn(template);
-};
+const sut = proxyquire("./index", {
+  "../utils": mockUtils
+});
 
 const flooredDate = new Date().toISOString().substring(0, 10);
 
-/* istanbul ignore next */
 describe("#services", function() {
   it("Correctly calculates the difference between 2 dates", function() {
     const result = sut.dateDiffInDays(
@@ -107,36 +106,21 @@ describe("#services", function() {
   });
 
   it("Errors rotating log files if there's a problem with the file system", function() {
-    const consoleError = console.error;
-
-    console.error = function() {
-      if (
-        arguments &&
-        Array.from(arguments)
-          .join(" ")
-          .indexOf("rotateLogFilesSync: ") === 0
-      ) {
-        return;
-      } else {
-        showWarning(Array.from(arguments));
-      }
-    };
-
-    sinon.spy(console, "error");
+    sinon.spy(mockUtils.consoleLog, "error");
 
     mockFs({ [sut.LOG_FOLDER]: { "info.09": {} } });
 
     try {
       sut.rotateLogFilesSync("info");
     } catch (error) {}
+
     mockFs.restore();
 
-    expect(console.error.called).to.be.true;
+    expect(mockUtils.consoleLog.error.called).to.be.true;
 
-    expect(console.error.firstCall.lastArg.code).to.equal("EPERM");
+    expect(mockUtils.consoleLog.error.firstCall.args[0]).to.contain("EPERM");
 
-    console.error.restore();
-    console.error = consoleError;
+    mockUtils.consoleLog.error.restore();
   });
 
   it("Makes a log file if it doesn't exist", function() {
@@ -269,21 +253,6 @@ describe("#services", function() {
   });
 
   it("Logs an info message", function() {
-    const consoleLog = console.log;
-
-    console.log = function() {
-      if (
-        arguments &&
-        Array.from(arguments)
-          .join(" ")
-          .indexOf("hello world") === 0
-      ) {
-        return;
-      } else {
-        showWarning(Array.from(arguments));
-      }
-    };
-
     mockFs({
       [sut.LOG_FOLDER]: {}
     });
@@ -299,37 +268,20 @@ describe("#services", function() {
     );
 
     mockFs.restore();
-    console.log = consoleLog;
   });
 
   it("Silently logs an info message", function() {
-    const consoleLog = console.log;
-
-    console.log = function() {
-      if (
-        arguments &&
-        Array.from(arguments)
-          .join(" ")
-          .indexOf("hello world") === 0
-      ) {
-        return;
-      } else {
-        showWarning(Array.from(arguments));
-      }
-    };
-
     mockFs({
       [sut.LOG_FOLDER]: {}
     });
 
-    sinon.spy(console, "log");
+    sinon.spy(mockUtils.consoleLog, "info");
 
     sut.logSync(["hello world"], true);
 
-    expect(console.log.called).to.equal(false);
+    expect(mockUtils.consoleLog.info.called).to.equal(false);
 
     mockFs.restore();
-    console.log = consoleLog;
   });
 
   it("Asynchronously logs an info message", function() {
@@ -351,21 +303,6 @@ describe("#services", function() {
   });
 
   it("Logs an error message", function() {
-    const consoleError = console.error;
-
-    console.error = function() {
-      if (
-        arguments &&
-        Array.from(arguments)
-          .join(" ")
-          .indexOf("hello world") === 0
-      ) {
-        return;
-      } else {
-        showWarning(Array.from(arguments));
-      }
-    };
-
     mockFs({
       [sut.LOG_FOLDER]: {}
     });
@@ -380,37 +317,20 @@ describe("#services", function() {
       /\w{3}, \d{0,2} \w{3} \d{4} \d{2}:\d{2}:\d{2} \w{3} - hello world/gm
     );
     mockFs.restore();
-    console.error = consoleError;
   });
 
   it("Silently logs an error message", function() {
-    const consoleError = console.error;
-
-    console.error = function() {
-      if (
-        arguments &&
-        Array.from(arguments)
-          .join(" ")
-          .indexOf("hello world") === 0
-      ) {
-        return;
-      } else {
-        showWarning(Array.from(arguments));
-      }
-    };
-
     mockFs({
       [sut.LOG_FOLDER]: {}
     });
 
-    sinon.spy(console, "error");
+    sinon.spy(mockUtils.consoleLog, "error");
 
     sut.errorSync(["hello world"], true);
 
-    expect(console.error.called).to.equal(false);
+    expect(mockUtils.consoleLog.error.called).to.equal(false);
 
     mockFs.restore();
-    console.error = consoleError;
   });
 
   it("Asynchronously logs an error message", function() {
@@ -452,9 +372,6 @@ describe("#services", function() {
   });
 
   it("Silently logs a warning message", function() {
-    const consoleWarn = console.warn;
-    console.warn = function() {};
-
     mockFs({
       [sut.LOG_FOLDER]: {}
     });
@@ -466,7 +383,6 @@ describe("#services", function() {
     expect(console.warn.called).to.equal(false);
 
     mockFs.restore();
-    console.warn = consoleWarn;
   });
 
   it("Asynchronously logs an warning message", function() {
