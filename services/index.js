@@ -69,9 +69,9 @@ function makeLogFileSync(name) {
 
   const pattern = RegExp(`${name}.\\d{4}-\\d{2}-\\d{2}`);
 
-  for (const item of readdirSync(LOG_FOLDER)) {    
-    if (pattern.test(item)) {      
-      const date = item.replace(`${name}.`, "").replace(".log", "");      
+  for (const item of readdirSync(LOG_FOLDER)) {
+    if (pattern.test(item)) {
+      const date = item.replace(`${name}.`, "").replace(".log", "");
       if (dateDiffInDays(new Date(date), new Date()) >= 1) {
         rotateLogFilesSync(name, date);
       }
@@ -129,8 +129,10 @@ function log(message, callback) {
   logMessage("info", message, callback);
 }
 
-function logSync(message) {
-  console.log(message);
+function logSync(message, silent) {
+  if (!silent) {
+    console.log(message);
+  }
 
   makeFolderSync();
 
@@ -143,8 +145,10 @@ function error(message, callback) {
   logMessage("error", message, callback);
 }
 
-function errorSync(message) {
-  console.error(message);
+function errorSync(message, silent) {
+  if (!silent) {
+    console.error(message);
+  }
 
   makeFolderSync();
 
@@ -157,8 +161,10 @@ function warn(message, callback) {
   logMessage("warn", message, callback);
 }
 
-function warnSync(message) {
-  console.warn(message);
+function warnSync(message, silent) {
+  if (!silent) {
+    console.warn(message);
+  }
 
   makeFolderSync();
 

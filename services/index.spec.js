@@ -302,6 +302,36 @@ describe("#services", function() {
     console.log = consoleLog;
   });
 
+  it("Silently logs an info message", function() {
+    const consoleLog = console.log;
+
+    console.log = function() {
+      if (
+        arguments &&
+        Array.from(arguments)
+          .join(" ")
+          .indexOf("hello world") === 0
+      ) {
+        return;
+      } else {
+        showWarning(Array.from(arguments));
+      }
+    };
+
+    mockFs({
+      [sut.LOG_FOLDER]: {}
+    });
+
+    sinon.spy(console, "log");
+
+    sut.logSync(["hello world"], true);
+
+    expect(console.log.called).to.equal(false);
+
+    mockFs.restore();
+    console.log = consoleLog;
+  });
+
   it("Asynchronously logs an info message", function() {
     mockFs({
       [sut.LOG_FOLDER]: {}
@@ -353,6 +383,36 @@ describe("#services", function() {
     console.error = consoleError;
   });
 
+  it("Silently logs an error message", function() {
+    const consoleError = console.error;
+
+    console.error = function() {
+      if (
+        arguments &&
+        Array.from(arguments)
+          .join(" ")
+          .indexOf("hello world") === 0
+      ) {
+        return;
+      } else {
+        showWarning(Array.from(arguments));
+      }
+    };
+
+    mockFs({
+      [sut.LOG_FOLDER]: {}
+    });
+
+    sinon.spy(console, "error");
+
+    sut.errorSync(["hello world"], true);
+
+    expect(console.error.called).to.equal(false);
+
+    mockFs.restore();
+    console.error = consoleError;
+  });
+
   it("Asynchronously logs an error message", function() {
     mockFs({
       [sut.LOG_FOLDER]: {}
@@ -387,6 +447,24 @@ describe("#services", function() {
     ).to.match(
       /\w{3}, \d{0,2} \w{3} \d{4} \d{2}:\d{2}:\d{2} \w{3} - hello world/gm
     );
+    mockFs.restore();
+    console.warn = consoleWarn;
+  });
+
+  it("Silently logs a warning message", function() {
+    const consoleWarn = console.warn;
+    console.warn = function() {};
+
+    mockFs({
+      [sut.LOG_FOLDER]: {}
+    });
+
+    sinon.spy(console, "warn");
+
+    sut.warnSync(["hello world"], true);
+
+    expect(console.warn.called).to.equal(false);
+
     mockFs.restore();
     console.warn = consoleWarn;
   });

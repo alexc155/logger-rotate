@@ -27,15 +27,22 @@ $ node ./node_modules/logger-rotate/index.js setLogFolder ./logs
 
 ## Usage
 
+### Synchronous Operation:
 ```
 var logger = require("logger-rotate");
 
-logger.logSync("Hello World");
+logger.logSync("Hello World", false);
 
-logger.warnSync("Warning!!!");
+logger.warnSync("Warning!!!", false);
 
-logger.errorSync("Game Over!");
+logger.errorSync("Game Over!", true);
 
+```
+(The second parameter in the synchronous methods is optional and denotes whether to run silently or not - default is false)
+
+### Asynchronous Operation:
+
+```
 logger.log("Hello World", () => {
     console.log(":-)");
   });
@@ -62,3 +69,4 @@ Add unit tests for any new or changed functionality. Lint and test your code.
 
 - 0.1.0 Initial release.
 - 0.2.1 Ability to set log folder & fixed log rotation bug.
+- 0.3.0 Flag for silent sync running.

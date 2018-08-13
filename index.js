@@ -30,13 +30,13 @@ function main() {
 
   switch (action.toLowerCase()) {
     case "logsync":
-      service.logSync(message);
+      service.logSync(message, false);
       break;
     case "errorsync":
-      service.errorSync(message);
+      service.errorSync(message, false);
       break;
     case "warnsync":
-      service.warnSync(message);
+      service.warnSync(message, false);
       break;
     case "log":
       service.log(message, () => console.log(message));
