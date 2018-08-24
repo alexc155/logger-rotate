@@ -11,7 +11,7 @@ The three methods `console.log`, `console.warn`, and `console.error` can be swap
 
 Separate files for the three levels of logging are stored and rotated for new empty files daily.
 
-A history of older log files is available.
+A history of older log files is available, and a list of the most recent messages is also available.
 
 ## Installation
 
@@ -28,6 +28,7 @@ $ node ./node_modules/logger-rotate/index.js setLogFolder ./logs
 ## Usage
 
 ### Synchronous Operation:
+
 ```
 var logger = require("logger-rotate");
 
@@ -36,9 +37,9 @@ logger.logSync("Hello World", false);
 logger.warnSync("Warning!!!", false);
 
 logger.errorSync("Game Over!", true);
-
 ```
-(The second parameter in the synchronous methods is optional and denotes whether to run silently or not - default is false)
+
+(The second parameter in the synchronous methods is optional and denotes whether to run silently or not i.e. don't show a console message - default is false)
 
 ### Asynchronous Operation:
 
@@ -56,6 +57,16 @@ logger.error("Game Over!", () => {
   });
 ```
 
+### Extras:
+
+To check on the most recent messages:
+
+```
+logger.showrecent(50);
+```
+
+The parameter is the number of recent messages to show (up to 999)
+
 ## Tests
 
 npm test
@@ -71,3 +82,4 @@ Add unit tests for any new or changed functionality. Lint and test your code.
 - 0.2.1 Ability to set log folder & fixed log rotation bug.
 - 0.3.0 Flag for silent sync running.
 - 0.3.1 Tidy tests.
+- 0.4.0 Show Recent Logs

@@ -16,8 +16,7 @@ function setLogFolder(location) {
 
 function main() {
   updateNotifier({
-    pkg,
-    updateCheckInterval: 0
+    pkg
   }).notify({
     isGlobal: true
   });
@@ -38,9 +37,6 @@ function main() {
     case "warnsync":
       service.warnSync(message, false);
       break;
-    case "log":
-      service.log(message, () => console.log(message));
-      break;
     case "error":
       service.error(message, () => console.error(message));
       break;
@@ -49,6 +45,13 @@ function main() {
       break;
     case "setlogfolder":
       setLogFolder(message);
+      break;
+    case "showrecent":
+      console.log(service.showRecent(20));
+      break;
+    case "log":
+    default:
+      service.log(message, () => console.log(message));
       break;
   }
 }
@@ -62,5 +65,6 @@ module.exports = {
   log: service.log,
   error: service.error,
   warn: service.warn,
+  showRecent: service.showRecent,
   setLogFolder
 };

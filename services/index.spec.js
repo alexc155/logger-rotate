@@ -196,19 +196,28 @@ describe("#services", function() {
     mockFs.restore();
   });
 
-  it("Asynchronously writes a time-stamped message to a log file", function() {
+  it("Asynchronously a time-stamped message to a log file and writes a recent log file", function() {
     mockFs({ [sut.LOG_FOLDER]: {} });
 
     appendFileSync(`${sut.LOG_FOLDER}/info.${flooredDate}.log`, EOL);
 
+    appendFileSync(`${sut.LOG_FOLDER}/recent.log`, "Message 1");
+
     sut.logMessage("info", "hello world", () => {
       expect(
-        readFileSync(`${sut.LOG_FOLDER}/info.${flooredDate}.log`, {
+        readFileSync(`${sut.LOG_FOLDER}/recent.log`, {
           encoding: "utf8"
         })
       ).to.match(
         /\w{3}, \d{0,2} \w{3} \d{4} \d{2}:\d{2}:\d{2} \w{3} - hello world/gm
       );
+
+      expect(
+        readFileSync(`${sut.LOG_FOLDER}/recent.log`, {
+          encoding: "utf8"
+        })
+      ).to.match(/Message 1/gm);
+
       mockFs.restore();
     });
   });
@@ -401,5 +410,30 @@ describe("#services", function() {
 
       mockFs.restore();
     });
+  });
+
+  it("Shows recent messages", function() {
+    mockFs({
+      [sut.LOG_FOLDER]: {}
+    });
+
+    appendFileSync(`${sut.LOG_FOLDER}/recent.log`, "Message 9" + EOL);
+    appendFileSync(`${sut.LOG_FOLDER}/recent.log`, "Message 8" + EOL);
+    appendFileSync(`${sut.LOG_FOLDER}/recent.log`, "Message 7" + EOL);
+    appendFileSync(`${sut.LOG_FOLDER}/recent.log`, "Message 6" + EOL);
+    appendFileSync(`${sut.LOG_FOLDER}/recent.log`, "Message 5" + EOL);
+    appendFileSync(`${sut.LOG_FOLDER}/recent.log`, "Message 4" + EOL);
+    appendFileSync(`${sut.LOG_FOLDER}/recent.log`, "Message 3" + EOL);
+    appendFileSync(`${sut.LOG_FOLDER}/recent.log`, "Message 2" + EOL);
+    appendFileSync(`${sut.LOG_FOLDER}/recent.log`, "Message 1" + EOL);
+    appendFileSync(`${sut.LOG_FOLDER}/recent.log`, "Message 0" + EOL);
+
+    const recentLog = sut.showRecent(5);
+
+    expect(recentLog).to.equal(
+      `Message 5${EOL}Message 6${EOL}Message 7${EOL}Message 8${EOL}Message 9`
+    );
+
+    mockFs.restore();
   });
 });

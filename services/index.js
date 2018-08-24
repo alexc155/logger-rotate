@@ -9,7 +9,11 @@ const {
   mkdirSync,
   existsSync,
   readdirSync,
-  readdir
+  readdir,
+  readFileSync,
+  writeFileSync,
+  readFile,
+  writeFile
 } = require("fs");
 
 const { EOL } = require("os");
@@ -94,7 +98,8 @@ function rotateLogFiles(name, testingCallback) {
           const date = item.replace(`${name}.`, "").replace(".log", "");
           if (dateDiffInDays(new Date(date), new Date()) >= 1) {
             rotateLogFilesSync(name, date);
-            appendFileSync(`${LOG_FOLDER}/${name}.log`, EOL);
+            const logPath = `${LOG_FOLDER}/${name}.${flooredDate}.log`;
+            appendFileSync(logPath, EOL);
           }
         }
       }
@@ -103,12 +108,58 @@ function rotateLogFiles(name, testingCallback) {
   });
 }
 
+function writeRecentLogSync(message) {
+  appendFileSync(`${LOG_FOLDER}/recent.log`, "");
+
+  const recentMessages = readFileSync(`${LOG_FOLDER}/recent.log`, {
+    encoding: "utf8"
+  }).split(EOL);
+
+  const newRecentMessages = [message.trim()].concat(
+    recentMessages.slice(0, 499)
+  );
+
+  writeFileSync(`${LOG_FOLDER}/recent.log`, newRecentMessages.join(EOL));
+}
+
+function writeRecentLog(message, callback) {
+  appendFile(`${LOG_FOLDER}/recent.log`, "", err => {
+    if (err) {
+      callback(err);
+    }
+    readFile(
+      `${LOG_FOLDER}/recent.log`,
+      {
+        encoding: "utf8"
+      },
+      (err, contents) => {
+        let recentMessages = [];
+        if (contents) {
+          recentMessages = contents.split(EOL);
+        }
+        const newRecentMessages = [message.trim()].concat(
+          recentMessages.slice(0, 499)
+        );
+        writeFile(
+          `${LOG_FOLDER}/recent.log`,
+          newRecentMessages.join(EOL),
+          () => {
+            callback();
+          }
+        );
+      }
+    );
+  });
+}
+
 function logMessage(name, message, callback, testingError, testingCallback) {
   rotateLogFiles(name, testingCallback);
 
-  message = `${new Date().toUTCString()} - ${message}${EOL}`;
+  message = `${new Date().toUTCString()} - ${message
+    .toString()
+    .replace(/EOL/g, "\n")}${EOL}`;
 
-  appendFile(`${LOG_FOLDER}/${name}.${flooredDate}.log`, message, err => {
+  writeRecentLog(message, err => {
     if (testingError || err) {
       if (!testingError && err.code === "ENOENT") {
         makeFolder(callback);
@@ -118,12 +169,20 @@ function logMessage(name, message, callback, testingError, testingCallback) {
       }
       return;
     }
-    callback();
+
+    appendFile(`${LOG_FOLDER}/${name}.${flooredDate}.log`, message, () => {
+      callback();
+    });
   });
 }
 
 function logMessageSync(name, message) {
-  message = `${new Date().toUTCString()} - ${message}${EOL}`;
+  const date = new Date().toUTCString();
+
+  message = `${date} - ${message.toString().replace(/EOL/g, "\n")}${EOL}`;
+
+  writeRecentLogSync(message);
+
   appendFileSync(`${LOG_FOLDER}/${name}.${flooredDate}.log`, message);
 }
 
@@ -134,7 +193,7 @@ function log(message, callback) {
 function logSync(message, silent) {
   if (!silent) {
     consoleLog.info(message);
-  }
+  }  
 
   makeFolderSync();
 
@@ -175,6 +234,14 @@ function warnSync(message, silent) {
   logMessageSync("warn", message);
 }
 
+function showRecent(lines) {
+  return readFileSync(`${LOG_FOLDER}/recent.log`, { encoding: "utf8" })
+    .split(EOL)
+    .slice(0, lines)
+    .reverse()
+    .join(EOL);
+}
+
 module.exports = {
   logSync,
   errorSync,
@@ -189,5 +256,7 @@ module.exports = {
   makeLogFileSync,
   logMessage,
   logMessageSync,
+  writeRecentLog,
+  showRecent,
   LOG_FOLDER
 };
