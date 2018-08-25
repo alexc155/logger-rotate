@@ -82,5 +82,6 @@ Add unit tests for any new or changed functionality. Lint and test your code.
 - 0.2.1 Ability to set log folder & fixed log rotation bug.
 - 0.3.0 Flag for silent sync running.
 - 0.3.1 Tidy tests.
-- 0.4.0 Show Recent Logs
+- 0.4.0 Show Recent Logs.
 - 0.4.1 Convert new lines to \n
+- 0.4.2 Stop writing recent log for async calls.
