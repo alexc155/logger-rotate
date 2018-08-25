@@ -11,9 +11,7 @@ const {
   readdirSync,
   readdir,
   readFileSync,
-  writeFileSync,
-  readFile,
-  writeFile
+  writeFileSync
 } = require("fs");
 
 const { EOL } = require("os");
@@ -122,41 +120,7 @@ function writeRecentLogSync(message) {
   writeFileSync(`${LOG_FOLDER}/recent.log`, newRecentMessages.join(EOL));
 }
 
-function writeRecentLog(message, callback) {
-  appendFile(`${LOG_FOLDER}/recent.log`, "", err => {
-    if (err) {
-      callback(err);
-    }
-    readFile(
-      `${LOG_FOLDER}/recent.log`,
-      {
-        encoding: "utf8"
-      },
-      (err, contents) => {
-        let recentMessages = [];
-        if (contents) {
-          recentMessages = contents.split(EOL);
-        }
-        const newRecentMessages = [message.trim()].concat(
-          recentMessages.slice(0, 499)
-        );
-        writeFile(
-          `${LOG_FOLDER}/recent.log`,
-          newRecentMessages.join(EOL),
-          () => {
-            callback();
-          }
-        );
-      }
-    );
-  });
-}
-
 function logMessage(name, message, callback, testingError, testingCallback) {
-  if (message.toString().trim() === "") {
-    callback();
-  }
-
   rotateLogFiles(name, testingCallback);
 
   message = `${new Date().toUTCString()} - ${message
@@ -166,7 +130,7 @@ function logMessage(name, message, callback, testingError, testingCallback) {
     .replace(/\r/g, "\\n")
     .replace(/\n/g, "\\n")}${EOL}`;
 
-  writeRecentLog(message, err => {
+  appendFile(`${LOG_FOLDER}/${name}.${flooredDate}.log`, message, err => {
     if (testingError || err) {
       if (!testingError && err.code === "ENOENT") {
         makeFolder(callback);
@@ -176,10 +140,7 @@ function logMessage(name, message, callback, testingError, testingCallback) {
       }
       return;
     }
-
-    appendFile(`${LOG_FOLDER}/${name}.${flooredDate}.log`, message, () => {
-      callback();
-    });
+    callback();
   });
 }
 
@@ -273,7 +234,6 @@ module.exports = {
   makeLogFileSync,
   logMessage,
   logMessageSync,
-  writeRecentLog,
   showRecent,
   LOG_FOLDER
 };

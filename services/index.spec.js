@@ -50,7 +50,6 @@ describe("#services", function() {
   });
 
   it("Asynchronously doesn't error when trying to create a log folder if it already exists", function() {
-    mockFs.restore();
     mockFs({ [sut.LOG_FOLDER]: {} });
 
     sut.makeFolder(() => {
@@ -60,7 +59,6 @@ describe("#services", function() {
   });
 
   it("Asynchronously errors when trying to create a log folder if there's a problem with the disk", function() {
-    mockFs.restore();
     mockFs({ "./": {} });
 
     sut.makeFolder(err => {
@@ -102,6 +100,7 @@ describe("#services", function() {
     expect(
       readFileSync(`${sut.LOG_FOLDER}/info.09`, { encoding: "utf8" })
     ).to.equal("log 8");
+
     mockFs.restore();
   });
 
@@ -141,6 +140,7 @@ describe("#services", function() {
     mockFs({
       [sut.LOG_FOLDER]: { [`info.${flooredDate}.log`]: "log today" }
     });
+
     sut.makeLogFileSync("info");
 
     expect(
@@ -148,6 +148,7 @@ describe("#services", function() {
         encoding: "utf8"
       })
     ).to.equal("log today");
+
     mockFs.restore();
   });
 
@@ -161,6 +162,7 @@ describe("#services", function() {
         ["info.01"]: "archived log"
       }
     });
+
     sut.makeLogFileSync("info");
 
     expect(
@@ -178,6 +180,7 @@ describe("#services", function() {
         encoding: "utf8"
       })
     ).to.equal(EOL);
+
     mockFs.restore();
   });
 
@@ -185,49 +188,47 @@ describe("#services", function() {
     mockFs({
       [sut.LOG_FOLDER]: { [`info.${flooredDate}.log`]: EOL }
     });
-    sut.logMessageSync("info", "hello world");
+
+    sut.logMessageSync("info", "hello world 1");
+
     expect(
       readFileSync(`${sut.LOG_FOLDER}/info.${flooredDate}.log`, {
         encoding: "utf8"
       })
     ).to.match(
-      /\w{3}, \d{0,2} \w{3} \d{4} \d{2}:\d{2}:\d{2} \w{3} - hello world/gm
+      /\w{3}, \d{0,2} \w{3} \d{4} \d{2}:\d{2}:\d{2} \w{3} - hello world 1/gm
     );
+
     mockFs.restore();
   });
 
   it("Does nothing when trying to write an empty message", function() {
     mockFs({ [sut.LOG_FOLDER]: { [`info.${flooredDate}.log`]: EOL } });
+
     sut.logMessageSync("info", "");
+
     expect(
       readFileSync(`${sut.LOG_FOLDER}/info.${flooredDate}.log`, {
         encoding: "utf8"
       })
     ).to.equal(EOL);
+
     mockFs.restore();
   });
 
-  it("Asynchronously writes a time-stamped message to a log file and writes a recent log file", function() {
+  it("Asynchronously writes a time-stamped message to a log file", function() {
     mockFs({ [sut.LOG_FOLDER]: {} });
 
     appendFileSync(`${sut.LOG_FOLDER}/info.${flooredDate}.log`, EOL);
 
-    appendFileSync(`${sut.LOG_FOLDER}/recent.log`, "Message 1");
-
-    sut.logMessage("info", "hello world", () => {
+    sut.logMessage("info", "hello world 2", () => {
       expect(
-        readFileSync(`${sut.LOG_FOLDER}/recent.log`, {
+        readFileSync(`${sut.LOG_FOLDER}/info.${flooredDate}.log`, {
           encoding: "utf8"
         })
       ).to.match(
-        /\w{3}, \d{0,2} \w{3} \d{4} \d{2}:\d{2}:\d{2} \w{3} - hello world/gm
+        /\w{3}, \d{0,2} \w{3} \d{4} \d{2}:\d{2}:\d{2} \w{3} - hello world 2/gm
       );
-
-      expect(
-        readFileSync(`${sut.LOG_FOLDER}/recent.log`, {
-          encoding: "utf8"
-        })
-      ).to.match(/Message 1/gm);
 
       mockFs.restore();
     });
@@ -236,7 +237,7 @@ describe("#services", function() {
   it("Asynchronously creates a log folder when writing a time-stamped message to a log file if it doesn't exist", function() {
     mockFs({ "./": {} });
 
-    sut.logMessage("info", "hello world", () => {
+    sut.logMessage("info", "hello world 3", () => {
       expect(existsSync(sut.LOG_FOLDER));
       mockFs.restore();
     });
@@ -251,7 +252,7 @@ describe("#services", function() {
 
     sut.logMessage(
       "info",
-      "hello world",
+      "hello world 3",
       err => {
         expect(err).to.equal("Test Error");
         mockFs.restore();
@@ -277,14 +278,14 @@ describe("#services", function() {
       [sut.LOG_FOLDER]: {}
     });
 
-    sut.logSync(["hello world"]);
+    sut.logSync(["hello world 5"]);
 
     expect(
       readFileSync(`${sut.LOG_FOLDER}/info.${flooredDate}.log`, {
         encoding: "utf8"
       })
     ).to.match(
-      /\w{3}, \d{0,2} \w{3} \d{4} \d{2}:\d{2}:\d{2} \w{3} - hello world/gm
+      /\w{3}, \d{0,2} \w{3} \d{4} \d{2}:\d{2}:\d{2} \w{3} - hello world 5/gm
     );
 
     mockFs.restore();
@@ -336,6 +337,7 @@ describe("#services", function() {
     ).to.match(
       /\w{3}, \d{0,2} \w{3} \d{4} \d{2}:\d{2}:\d{2} \w{3} - hello world/gm
     );
+
     mockFs.restore();
   });
 
@@ -446,21 +448,5 @@ describe("#services", function() {
     );
 
     mockFs.restore();
-  });
-
-  it("Anschronously does nothing when trying to write an empty message", function () {
-    mockFs({ [sut.LOG_FOLDER]: {} });
-
-    appendFileSync(`${sut.LOG_FOLDER}/info.${flooredDate}.log`, EOL);
-
-    sut.logMessage("info", "", () => {
-      expect(
-        readFileSync(`${sut.LOG_FOLDER}/info.${flooredDate}.log`, {
-          encoding: "utf8"
-        })
-      ).to.equal(EOL);
-
-      mockFs.restore();
-    });
   });
 });
