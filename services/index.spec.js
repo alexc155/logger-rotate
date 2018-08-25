@@ -196,7 +196,18 @@ describe("#services", function() {
     mockFs.restore();
   });
 
-  it("Asynchronously a time-stamped message to a log file and writes a recent log file", function() {
+  it("Does nothing when trying to write an empty message", function() {
+    mockFs({ [sut.LOG_FOLDER]: { [`info.${flooredDate}.log`]: EOL } });
+    sut.logMessageSync("info", "");
+    expect(
+      readFileSync(`${sut.LOG_FOLDER}/info.${flooredDate}.log`, {
+        encoding: "utf8"
+      })
+    ).to.equal(EOL);
+    mockFs.restore();
+  });
+
+  it("Asynchronously writes a time-stamped message to a log file and writes a recent log file", function() {
     mockFs({ [sut.LOG_FOLDER]: {} });
 
     appendFileSync(`${sut.LOG_FOLDER}/info.${flooredDate}.log`, EOL);
@@ -435,5 +446,21 @@ describe("#services", function() {
     );
 
     mockFs.restore();
+  });
+
+  it("Anschronously does nothing when trying to write an empty message", function () {
+    mockFs({ [sut.LOG_FOLDER]: {} });
+
+    appendFileSync(`${sut.LOG_FOLDER}/info.${flooredDate}.log`, EOL);
+
+    sut.logMessage("info", "", () => {
+      expect(
+        readFileSync(`${sut.LOG_FOLDER}/info.${flooredDate}.log`, {
+          encoding: "utf8"
+        })
+      ).to.equal(EOL);
+
+      mockFs.restore();
+    });
   });
 });

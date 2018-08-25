@@ -153,11 +153,18 @@ function writeRecentLog(message, callback) {
 }
 
 function logMessage(name, message, callback, testingError, testingCallback) {
+  if (message.toString().trim() === "") {
+    callback();
+  }
+
   rotateLogFiles(name, testingCallback);
 
   message = `${new Date().toUTCString()} - ${message
     .toString()
-    .replace(/EOL/g, "\n")}${EOL}`;
+    .replace(/EOL/g, "\\n")
+    .replace(/\r\n/g, "\\n")
+    .replace(/\r/g, "\\n")
+    .replace(/\n/g, "\\n")}${EOL}`;
 
   writeRecentLog(message, err => {
     if (testingError || err) {
@@ -179,7 +186,16 @@ function logMessage(name, message, callback, testingError, testingCallback) {
 function logMessageSync(name, message) {
   const date = new Date().toUTCString();
 
-  message = `${date} - ${message.toString().replace(/EOL/g, "\n")}${EOL}`;
+  if (message.toString().trim() === "") {
+    return;
+  }
+
+  message = `${date} - ${message
+    .toString()
+    .replace(/EOL/g, "\\n")
+    .replace(/\r\n/g, "\\n")
+    .replace(/\r/g, "\\n")
+    .replace(/\n/g, "\\n")}${EOL}`;
 
   writeRecentLogSync(message);
 
@@ -193,7 +209,7 @@ function log(message, callback) {
 function logSync(message, silent) {
   if (!silent) {
     consoleLog.info(message);
-  }  
+  }
 
   makeFolderSync();
 
@@ -239,7 +255,8 @@ function showRecent(lines) {
     .split(EOL)
     .slice(0, lines)
     .reverse()
-    .join(EOL);
+    .join(EOL)
+    .replace(/\\n/g, EOL);
 }
 
 module.exports = {
