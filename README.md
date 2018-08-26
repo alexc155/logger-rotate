@@ -85,3 +85,4 @@ Add unit tests for any new or changed functionality. Lint and test your code.
 - 0.4.0 Show Recent Logs.
 - 0.4.1 Convert new lines to \n
 - 0.4.2 Stop writing recent log for async calls.
+- 0.4.3 Tests that include logger-rotate are accidentally triggering its methods.

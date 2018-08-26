@@ -50,7 +50,6 @@ function main() {
       console.log(service.showRecent(20));
       break;
     case "log":
-    default:
       service.log(message, () => console.log(message));
       break;
   }

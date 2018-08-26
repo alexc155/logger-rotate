@@ -1,6 +1,6 @@
 {
   "name": "logger-rotate",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "Log messages to files that are rotated daily",
   "main": "index.js",
   "scripts": {
