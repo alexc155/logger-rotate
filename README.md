@@ -1,3 +1,5 @@
+[![NPM Version](https://img.shields.io/npm/v/logger-rotate.svg?style=flat-square)](https://www.npmjs.com/package/logger-rotate)
+[![NPM Downloads](https://img.shields.io/npm/dm/logger-rotate.svg?style=flat-square)](https://www.npmjs.com/package/logger-rotate)
 [![Build Status](https://travis-ci.org/alexc155/logger-rotate.svg?branch=master)](https://travis-ci.org/alexc155/logger-rotate)
 [![Coverage Status](https://coveralls.io/repos/github/alexc155/logger-rotate/badge.svg?branch=master)](https://coveralls.io/github/alexc155/logger-rotate?branch=master)
 [![dependencies Status](https://david-dm.org/alexc155/logger-rotate/status.svg)](https://david-dm.org/alexc155/logger-rotate)
